@@ -1,0 +1,185 @@
+// ============================================================
+// BuyNexa - Prisma Database Schema
+// Run: npx prisma db push   (or prisma migrate dev for migrations)
+// ============================================================
+
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "linux-arm64-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------- Admin ----------------
+
+model AdminUser {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         String   @default("admin") // admin | superadmin
+  createdAt    DateTime @default(now())
+  lastLoginAt  DateTime?
+}
+
+// ---------------- Catalog ----------------
+
+model Category {
+  id        String    @id @default(cuid())
+  name      String
+  slug      String    @unique
+  imageUrl  String?
+  isActive  Boolean   @default(true)
+  products  Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Product {
+  id              String        @id @default(cuid())
+  sku             String        @unique
+  name            String
+  slug            String        @unique
+  description     String
+  specifications  Json?         // [{ "key": "RAM", "value": "8GB" }, ...]
+  price           Decimal       @db.Decimal(10, 2) // selling price
+  originalPrice   Decimal       @db.Decimal(10, 2) // MRP, used to compute discount %
+  stock           Int           @default(0)
+  lowStockAlertAt Int           @default(5)
+  isFeatured      Boolean       @default(false)
+  isBestseller    Boolean       @default(false)
+  isEnabled       Boolean       @default(true)
+  categoryId      String
+  category        Category      @relation(fields: [categoryId], references: [id])
+  images          ProductImage[]
+  orderItems      OrderItem[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([categoryId])
+  @@index([isFeatured])
+  @@index([isBestseller])
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String
+  sortOrder Int     @default(0)
+}
+
+// ---------------- Orders (guest checkout - no customer accounts) ----------------
+
+enum OrderStatus {
+  PLACED
+  PAYMENT_CONFIRMED
+  PROCESSING
+  PACKED
+  SHIPPED
+  OUT_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  CANCELLED
+}
+
+model Order {
+  id               String        @id @default(cuid())
+  orderNumber      String        @unique // human-friendly, e.g. BXN-20260912-0001, shown to customer
+
+  // --- Guest customer / delivery info (ADMIN-ONLY visibility, enforced in API layer) ---
+  customerName     String
+  customerPhone    String
+  customerEmail    String?
+  addressLine1     String        // House/Flat/Building
+  addressLine2     String        // Street/Area
+  landmark         String?
+  city             String
+  state            String
+  pincode          String
+  country          String        @default("India")
+
+  items            OrderItem[]
+
+  subtotal         Decimal       @db.Decimal(10, 2)
+  discountAmount   Decimal       @db.Decimal(10, 2) @default(0)
+  deliveryCharge   Decimal       @db.Decimal(10, 2) @default(0)
+  totalAmount      Decimal       @db.Decimal(10, 2)
+
+  couponCode       String?
+
+  paymentStatus    PaymentStatus @default(PENDING)
+  orderStatus      OrderStatus   @default(PLACED)
+
+  payment          Payment?
+
+  createdAt        DateTime      @default(now())
+  paymentCompletedAt DateTime?
+  statusUpdatedAt  DateTime      @updatedAt
+
+  @@index([customerPhone])
+  @@index([orderStatus])
+  @@index([paymentStatus])
+  @@index([city])
+  @@index([pincode])
+}
+
+model OrderItem {
+  id          String   @id @default(cuid())
+  orderId     String
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id])
+  productName String   // snapshot at time of order
+  unitPrice   Decimal  @db.Decimal(10, 2) // snapshot at time of order
+  quantity    Int
+}
+
+// ---------------- Payments ----------------
+
+model Payment {
+  id                String        @id @default(cuid())
+  orderId           String        @unique
+  order             Order         @relation(fields: [orderId], references: [id])
+  razorpayOrderId   String        @unique
+  razorpayPaymentId String?
+  razorpaySignature String?
+  amount            Decimal       @db.Decimal(10, 2)
+  status            PaymentStatus @default(PENDING)
+  method            String?       // upi | card | netbanking | wallet
+  createdAt         DateTime      @default(now())
+  verifiedAt        DateTime?
+}
+
+// ---------------- Coupons ----------------
+
+model Coupon {
+  id               String   @id @default(cuid())
+  code             String   @unique
+  type             String   // "PERCENT" | "FIXED"
+  value            Decimal  @db.Decimal(10, 2)
+  minOrderAmount   Decimal  @db.Decimal(10, 2) @default(0)
+  expiresAt        DateTime?
+  maxUsage         Int?
+  usageCount       Int      @default(0)
+  isEnabled        Boolean  @default(true)
+  createdAt        DateTime @default(now())
+}
+
+// ---------------- Settings ----------------
+
+model DeliverySettings {
+  id                  String  @id @default("singleton")
+  fixedCharge         Decimal @db.Decimal(10, 2) @default(49)
+  freeDeliveryAbove   Decimal @db.Decimal(10, 2) @default(999)
+  updatedAt           DateTime @updatedAt
+}
