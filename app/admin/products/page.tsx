@@ -71,7 +71,7 @@ export default function AdminProductsPage() {
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold">Products</h1>
         <button onClick={() => setShowForm((s) => !s)} className="btn-primary !px-4 !py-2 text-sm">
-          {showForm ? "Cancel" : "+ Add Product"}
+          {showForm ? "Cancel" : "＋ Add Product"}
         </button>
       </div>
 
