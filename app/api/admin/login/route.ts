@@ -34,8 +34,8 @@ export async function POST(req: NextRequest) {
 
     if (!admin || !passwordOk) {
       attempts.set(ip, {
-        count: (record?.resetAt > now ? record.count : 0) + 1,
-        resetAt: record?.resetAt > now ? record.resetAt : now + WINDOW_MS,
+        count: (record?.resetAt !== undefined && record.resetAt > now ? record.count : 0) + 1,
+        resetAt: record?.resetAt !== undefined && record.resetAt > now ? record.resetAt : now + WINDOW_MS,
       });
       return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
     }
