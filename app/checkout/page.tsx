@@ -21,7 +21,7 @@ export default function CheckoutPage() {
   const router = useRouter();
   const [form, setForm] = useState(initialForm);
   const [confirmed, setConfirmed] = useState(false);
-  const [couponCode, setCouponCode] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState<"COD" | "ONLINE">("ONLINE");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [scriptLoaded, setScriptLoaded] = useState(false);
@@ -55,7 +55,7 @@ export default function CheckoutPage() {
       setError("Please confirm your delivery details are correct.");
       return;
     }
-    if (!scriptLoaded) {
+    if (paymentMethod === "ONLINE" && !scriptLoaded) {
       setError("Payment gateway is still loading, please wait a moment.");
       return;
     }
@@ -67,7 +67,7 @@ export default function CheckoutPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
-          couponCode: couponCode || undefined,
+          paymentMethod,
           confirmedDetails: true,
           items: items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
         }),
@@ -157,17 +157,59 @@ export default function CheckoutPage() {
         </div>
 
         <div className="card p-5">
-          <h2 className="font-semibold mb-3">Coupon Code</h2>
-          <div className="flex gap-2">
-            <input placeholder="Enter coupon code" className="input" value={couponCode} onChange={(e) => setCouponCode(e.target.value)} />
+          <h2 className="font-semibold mb-3">Payment Method</h2>
+
+          <div className="space-y-3">
+            <label className="flex items-center gap-3 border rounded-lg p-4 cursor-pointer">
+              <input
+                type="radio"
+                name="paymentMethod"
+                value="ONLINE"
+                checked={paymentMethod === "ONLINE"}
+                onChange={() => setPaymentMethod("ONLINE")}
+              />
+              <div>
+                <p className="font-semibold">Online Payment / QR</p>
+                <p className="text-xs text-gray-500">Scan the QR code below to pay using any UPI app.</p>
+              </div>
+            </label>
+
+            {paymentMethod === "ONLINE" && (
+              <div className="border rounded-lg p-4 text-center">
+                <img
+                  src="/payment-qr.png"
+                  alt="BuyNexa Online Payment QR"
+                  className="w-64 h-auto mx-auto rounded-lg"
+                />
+                <p className="font-semibold mt-3">Scan & Pay</p>
+                <p className="text-xs text-gray-500">UPI ID: 9274424826@nyes</p>
+              </div>
+            )}
+
+            <label className="flex items-center gap-3 border rounded-lg p-4 cursor-pointer">
+              <input
+                type="radio"
+                name="paymentMethod"
+                value="COD"
+                checked={paymentMethod === "COD"}
+                onChange={() => setPaymentMethod("COD")}
+              />
+              <div>
+                <p className="font-semibold">Cash on Delivery</p>
+                <p className="text-xs text-gray-500">Pay when your order is delivered.</p>
+              </div>
+            </label>
           </div>
-          <p className="text-xs text-gray-400 mt-2">Coupon will be validated and applied when you pay.</p>
         </div>
 
         {error && <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-3">{error}</p>}
 
         <button type="submit" disabled={loading} className="btn-accent w-full text-lg">
-          {loading ? "Processing..." : `Pay Securely`}
+          {loading
+            ? "Processing..."
+            : paymentMethod === "COD"
+              ? "Place Order — Cash on Delivery"
+              : "Pay Online / QR"}
         </button>
       </form>
 

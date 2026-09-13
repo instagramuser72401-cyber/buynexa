@@ -150,7 +150,7 @@ model Payment {
   id                String        @id @default(cuid())
   orderId           String        @unique
   order             Order         @relation(fields: [orderId], references: [id])
-  razorpayOrderId   String        @unique
+  razorpayOrderId   String?       @unique
   razorpayPaymentId String?
   razorpaySignature String?
   amount            Decimal       @db.Decimal(10, 2)

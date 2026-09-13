@@ -89,7 +89,7 @@ export default function AdminProductsPage() {
           <input required type="number" placeholder="Stock Quantity" className="input" value={form.stock} onChange={(e) => setForm((f) => ({ ...f, stock: e.target.value }))} />
           <input type="number" placeholder="Low Stock Alert At" className="input" value={form.lowStockAlertAt} onChange={(e) => setForm((f) => ({ ...f, lowStockAlertAt: e.target.value }))} />
           <textarea required placeholder="Description" className="input sm:col-span-2" value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} />
-          <input required placeholder="Image URLs (comma separated)" className="input sm:col-span-2" value={form.images} onChange={(e) => setForm((f) => ({ ...f, images: e.target.value }))} />
+          <input required type="url" placeholder="Image URL (https://...)" className="input sm:col-span-2" value={form.images} onChange={(e) => setForm((f) => ({ ...f, images: e.target.value }))} />
           <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.isFeatured} onChange={(e) => setForm((f) => ({ ...f, isFeatured: e.target.checked }))} /> Featured</label>
           <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.isBestseller} onChange={(e) => setForm((f) => ({ ...f, isBestseller: e.target.checked }))} /> Bestseller</label>
           {error && <p className="text-red-600 text-sm sm:col-span-2">{error}</p>}

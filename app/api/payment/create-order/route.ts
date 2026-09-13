@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { razorpay } from "@/lib/razorpay";
+import { getRazorpay } from "@/lib/razorpay";
 import { generateOrderNumber } from "@/lib/orderNumber";
-import { calculateDeliveryCharge, validateCoupon } from "@/lib/pricing";
+import { calculateDeliveryCharge } from "@/lib/pricing";
 
 const CheckoutSchema = z.object({
   customerName: z.string().min(2).max(120),
@@ -16,41 +16,49 @@ const CheckoutSchema = z.object({
   state: z.string().min(2).max(100),
   pincode: z.string().regex(/^\d{6}$/, "Enter a valid 6-digit pincode"),
   country: z.string().min(2).max(60).default("India"),
-  couponCode: z.string().max(40).optional().or(z.literal("")),
+  paymentMethod: z.enum(["COD", "ONLINE"]),
   items: z
-    .array(z.object({ productId: z.string(), quantity: z.number().int().min(1).max(20) }))
+    .array(z.object({
+      productId: z.string(),
+      quantity: z.number().int().min(1).max(20),
+    }))
     .min(1),
   confirmedDetails: z.literal(true, {
     errorMap: () => ({ message: "Please confirm your delivery details are correct" }),
   }),
 });
 
-/**
- * PRICING SECURITY NOTE:
- * We NEVER trust prices, discounts, or delivery charges sent from the client.
- * Every amount below is recomputed from the database inside this handler.
- */
 export async function POST(req: NextRequest) {
   try {
     const body = CheckoutSchema.parse(await req.json());
 
-    // 1. Load live product data & validate stock
     const productIds = body.items.map((i) => i.productId);
+
     const products = await prisma.product.findMany({
-      where: { id: { in: productIds }, isEnabled: true },
+      where: {
+        id: { in: productIds },
+        isEnabled: true,
+      },
     });
 
     if (products.length !== productIds.length) {
-      return NextResponse.json({ error: "One or more products are unavailable" }, { status: 400 });
+      return NextResponse.json(
+        { error: "One or more products are unavailable" },
+        { status: 400 }
+      );
     }
 
     let subtotal = 0;
+
     const itemsForOrder = body.items.map((item) => {
       const product = products.find((p) => p.id === item.productId)!;
+
       if (product.stock < item.quantity) {
         throw new Error(`OUT_OF_STOCK:${product.name}`);
       }
+
       subtotal += Number(product.price) * item.quantity;
+
       return {
         productId: product.id,
         productName: product.name,
@@ -59,31 +67,81 @@ export async function POST(req: NextRequest) {
       };
     });
 
-    // 2. Coupon (server-validated)
-    let discountAmount = 0;
-    if (body.couponCode) {
-      const result = await validateCoupon(body.couponCode, subtotal);
-      if (!result.valid) {
-        return NextResponse.json({ error: result.reason }, { status: 400 });
-      }
-      discountAmount = result.discount!;
-    }
-
-    // 3. Delivery charge (server-validated)
-    const deliveryCharge = await calculateDeliveryCharge(subtotal - discountAmount);
-
-    const totalAmount = Math.max(0, subtotal - discountAmount + deliveryCharge);
+    const deliveryCharge = await calculateDeliveryCharge(subtotal);
+    const totalAmount = Math.max(0, subtotal + deliveryCharge);
     const amountInPaise = Math.round(totalAmount * 100);
 
-    // 4. Create Razorpay order
+    // COD: create order directly without Razorpay
+    if (body.paymentMethod === "COD") {
+      const orderNumber = generateOrderNumber();
+
+      const order = await prisma.order.create({
+        data: {
+          orderNumber,
+          customerName: body.customerName,
+          customerPhone: body.customerPhone,
+          customerEmail: body.customerEmail || null,
+          addressLine1: body.addressLine1,
+          addressLine2: body.addressLine2,
+          landmark: body.landmark || null,
+          city: body.city,
+          state: body.state,
+          pincode: body.pincode,
+          country: body.country,
+          subtotal,
+          discountAmount: 0,
+          deliveryCharge,
+          totalAmount,
+          couponCode: null,
+          paymentStatus: "PENDING",
+          orderStatus: "PLACED",
+
+          items: {
+            create: itemsForOrder,
+          },
+
+          payment: {
+            create: {
+              razorpayOrderId: null,
+              amount: totalAmount,
+              status: "PENDING",
+              method: "cod",
+            },
+          },
+        },
+      });
+
+      // Reserve/decrement stock for COD immediately.
+      await prisma.$transaction(
+        itemsForOrder.map((item) =>
+          prisma.product.update({
+            where: { id: item.productId },
+            data: {
+              stock: {
+                decrement: item.quantity,
+              },
+            },
+          })
+        )
+      );
+
+      return NextResponse.json({
+        success: true,
+        paymentMethod: "COD",
+        internalOrderId: order.id,
+        orderNumber: order.orderNumber,
+      });
+    }
+
+    // Online payment: create Razorpay order
+    const razorpay = getRazorpay();
+
     const rzpOrder = await razorpay.orders.create({
       amount: amountInPaise,
       currency: "INR",
       receipt: generateOrderNumber(),
     });
 
-    // 5. Create our Order + Payment record as PENDING.
-    // Stock is NOT reduced yet - only after payment is verified (see /api/payment/verify).
     const order = await prisma.order.create({
       data: {
         orderNumber: rzpOrder.receipt as string,
@@ -98,22 +156,29 @@ export async function POST(req: NextRequest) {
         pincode: body.pincode,
         country: body.country,
         subtotal,
-        discountAmount,
+        discountAmount: 0,
         deliveryCharge,
         totalAmount,
-        couponCode: body.couponCode || null,
-        items: { create: itemsForOrder },
+        couponCode: null,
+
+        items: {
+          create: itemsForOrder,
+        },
+
         payment: {
           create: {
             razorpayOrderId: rzpOrder.id,
             amount: totalAmount,
             status: "PENDING",
+            method: "online",
           },
         },
       },
     });
 
     return NextResponse.json({
+      success: true,
+      paymentMethod: "ONLINE",
       razorpayOrderId: rzpOrder.id,
       razorpayKeyId: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
       amount: amountInPaise,
@@ -122,13 +187,21 @@ export async function POST(req: NextRequest) {
       orderNumber: order.orderNumber,
     });
   } catch (err: any) {
-    if (typeof err.message === "string" && err.message.startsWith("OUT_OF_STOCK:")) {
+    if (
+      typeof err.message === "string" &&
+      err.message.startsWith("OUT_OF_STOCK:")
+    ) {
       return NextResponse.json(
         { error: `${err.message.split(":")[1]} is out of stock` },
         { status: 400 }
       );
     }
+
     console.error("create-order error:", err);
-    return NextResponse.json({ error: "Could not create order" }, { status: 400 });
+
+    return NextResponse.json(
+      { error: "Could not create order" },
+      { status: 400 }
+    );
   }
 }
