@@ -4,12 +4,6 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
 
-declare global {
-  interface Window {
-    Razorpay: any;
-  }
-}
-
 const initialForm = {
   customerName: "", customerPhone: "", customerEmail: "",
   addressLine1: "", addressLine2: "", landmark: "",
@@ -24,15 +18,6 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState<"COD" | "ONLINE">("ONLINE");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [scriptLoaded, setScriptLoaded] = useState(false);
-
-  useEffect(() => {
-    const script = document.createElement("script");
-    script.src = "https://checkout.razorpay.com/v1/checkout.js";
-    script.onload = () => setScriptLoaded(true);
-    document.body.appendChild(script);
-    return () => { document.body.removeChild(script); };
-  }, []);
 
   if (items.length === 0) {
     return (
@@ -55,11 +40,6 @@ export default function CheckoutPage() {
       setError("Please confirm your delivery details are correct.");
       return;
     }
-    if (paymentMethod === "ONLINE" && !scriptLoaded) {
-      setError("Payment gateway is still loading, please wait a moment.");
-      return;
-    }
-
     setLoading(true);
     try {
       const res = await fetch("/api/payment/create-order", {
@@ -80,47 +60,9 @@ export default function CheckoutPage() {
         return;
       }
 
-      const rzp = new window.Razorpay({
-        key: data.razorpayKeyId,
-        amount: data.amount,
-        currency: data.currency,
-        name: "BuyNexa",
-        description: `Order ${data.orderNumber}`,
-        order_id: data.razorpayOrderId,
-        prefill: {
-          name: form.customerName,
-          contact: form.customerPhone,
-          email: form.customerEmail || undefined,
-        },
-        theme: { color: "#217a61" },
-        handler: async function (response: any) {
-          const verifyRes = await fetch("/api/payment/verify", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(response),
-          });
-          const verifyData = await verifyRes.json();
-          if (verifyRes.ok && verifyData.success) {
-            clearCart();
-            router.push(`/order-success/${data.internalOrderId}?orderNumber=${verifyData.orderNumber}`);
-          } else {
-            router.push(`/order-success/${data.internalOrderId}?status=failed`);
-          }
-        },
-        modal: {
-          ondismiss: function () {
-            setLoading(false);
-            setError("Payment was cancelled. You can try again anytime.");
-          },
-        },
-      });
+      clearCart();
+      router.push(`/order-success/${data.internalOrderId}`);
 
-      rzp.on("payment.failed", function () {
-        setLoading(false);
-        setError("Payment failed. Please try again or use a different payment method.");
-      });
-
-      rzp.open();
     } catch (err) {
       setError("Something went wrong. Please try again.");
       setLoading(false);

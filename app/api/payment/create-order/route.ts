@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { getRazorpay } from "@/lib/razorpay";
 import { generateOrderNumber } from "@/lib/orderNumber";
 import { calculateDeliveryCharge } from "@/lib/pricing";
 
@@ -134,17 +133,11 @@ export async function POST(req: NextRequest) {
     }
 
     // Online payment: create Razorpay order
-    const razorpay = getRazorpay();
-
-    const rzpOrder = await razorpay.orders.create({
-      amount: amountInPaise,
-      currency: "INR",
-      receipt: generateOrderNumber(),
-    });
+    const orderNumber = generateOrderNumber();
 
     const order = await prisma.order.create({
       data: {
-        orderNumber: rzpOrder.receipt as string,
+        orderNumber,
         customerName: body.customerName,
         customerPhone: body.customerPhone,
         customerEmail: body.customerEmail || null,
@@ -160,32 +153,38 @@ export async function POST(req: NextRequest) {
         deliveryCharge,
         totalAmount,
         couponCode: null,
-
-        items: {
-          create: itemsForOrder,
-        },
-
+        paymentStatus: "PENDING",
+        orderStatus: "PLACED",
+        items: { create: itemsForOrder },
         payment: {
           create: {
-            razorpayOrderId: rzpOrder.id,
+            razorpayOrderId: null,
             amount: totalAmount,
             status: "PENDING",
-            method: "online",
+            method: "qr",
           },
         },
       },
     });
 
+    await prisma.$transaction(
+      itemsForOrder.map((item) =>
+        prisma.product.update({
+          where: { id: item.productId },
+          data: { stock: { decrement: item.quantity } },
+        })
+      )
+    );
+
     return NextResponse.json({
       success: true,
-      paymentMethod: "ONLINE",
-      razorpayOrderId: rzpOrder.id,
-      razorpayKeyId: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-      amount: amountInPaise,
-      currency: "INR",
+      paymentMethod: body.paymentMethod,
       internalOrderId: order.id,
       orderNumber: order.orderNumber,
+      amount: amountInPaise,
+      currency: "INR",
     });
+
   } catch (err: any) {
     if (
       typeof err.message === "string" &&
