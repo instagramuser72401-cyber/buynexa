@@ -8,7 +8,6 @@ export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<any[]>([]);
   const [filters, setFilters] = useState({ orderNumber: "", customerName: "", customerPhone: "", city: "", pincode: "", orderStatus: "", paymentStatus: "", period: "" });
   const [expanded, setExpanded] = useState<string | null>(null);
-  const [newOrderIds, setNewOrderIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchOrders = useCallback(async () => {
@@ -37,27 +36,6 @@ export default function AdminOrdersPage() {
     setOrders(data.orders || []);
     setLoading(false);
   }, [filters]);
-
-  useEffect(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem("buynexa-new-order-ids") || "[]");
-      setNewOrderIds(Array.isArray(saved) ? saved : []);
-    } catch {
-      setNewOrderIds([]);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!loading && orders.length > 0) {
-      const knownIds = new Set(newOrderIds);
-      const storedIds = orders.map((o) => o.id).filter((id) => !knownIds.has(id));
-      if (storedIds.length > 0) {
-        const updated = [...newOrderIds, ...storedIds];
-        setNewOrderIds(updated);
-        localStorage.setItem("buynexa-new-order-ids", JSON.stringify(updated));
-      }
-    }
-  }, [orders, loading, newOrderIds]);
 
   useEffect(() => { fetchOrders(); }, [fetchOrders]);
 
@@ -110,36 +88,6 @@ export default function AdminOrdersPage() {
           {["PENDING", "PAID", "FAILED", "CANCELLED"].map((s) => <option key={s} value={s}>{s}</option>)}
         </select>
       </div>
-
-      {!loading && newOrderIds.filter((id) => orders.some((o) => o.id === id)).length > 0 && (
-        <div className="mb-6">
-          <h2 className="text-xl font-bold mb-3">New Orders</h2>
-          <div className="space-y-3">
-            {orders.filter((order) => newOrderIds.includes(order.id)).map((order) => (
-              <div key={order.id} className="card p-4 border-2 border-orange-400">
-                <div
-                  className="flex flex-wrap items-center justify-between gap-2 cursor-pointer"
-                  onClick={() => {
-                    setExpanded(expanded === order.id ? null : order.id);
-                    const updated = newOrderIds.filter((id) => id !== order.id);
-                    setNewOrderIds(updated);
-                    localStorage.setItem("buynexa-new-order-ids", JSON.stringify(updated));
-                  }}
-                >
-                  <div>
-                    <span className="font-bold">{order.orderNumber}</span>
-                    <span className="ml-2 text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full">NEW</span>
-                    <span className="text-sm text-gray-500 ml-3">{new Date(order.createdAt).toLocaleString("en-IN")}</span>
-                  </div>
-                  <span className="font-bold">₹{order.totalAmount}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      <h2 className="text-xl font-bold mb-3">All Orders</h2>
 
       {loading ? (
         <p className="text-gray-400">Loading...</p>
