@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { generateOrderNumber } from "@/lib/orderNumber";
-import { calculateDeliveryCharge } from "@/lib/pricing";
 
 const CheckoutSchema = z.object({
   customerName: z.string().min(2).max(120),
@@ -67,8 +66,8 @@ export async function POST(req: NextRequest) {
       };
     });
 
-    const deliveryCharge = await calculateDeliveryCharge(subtotal);
-    const totalAmount = Math.max(0, subtotal + deliveryCharge);
+    const deliveryCharge = 0;
+    const totalAmount = subtotal;
     const amountInPaise = Math.round(totalAmount * 100);
 
     // COD: create order directly without Razorpay
