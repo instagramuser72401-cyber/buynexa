@@ -105,6 +105,14 @@ export default function Header() {
             >
               🚚 Track Order
             </Link>
+            
+            <Link
+              href="/support"
+              onClick={() => setMenuOpen(false)}
+              className="block px-3 py-3 rounded-lg hover:bg-gray-50 font-medium"
+            >
+              💬 Customer Support
+            </Link>
           </nav>
         </div>
       )}

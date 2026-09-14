@@ -186,3 +186,23 @@ model DeliverySettings {
   freeDeliveryAbove   Decimal @db.Decimal(10, 2) @default(999)
   updatedAt           DateTime @updatedAt
 }
+
+
+// ---------------- Customer Support ----------------
+
+model SupportTicket {
+  id           String   @id @default(cuid())
+  customerName String
+  customerPhone String
+  customerEmail String?
+  subject      String?
+  message      String
+  reply        String?
+  status       String   @default("OPEN") // OPEN | REPLIED | CLOSED
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([customerPhone])
+  @@index([status])
+  @@index([createdAt])
+}
