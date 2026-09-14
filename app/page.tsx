@@ -63,14 +63,19 @@ export default async function HomePage({ searchParams }: { searchParams: { searc
 
   return (
     <div>
-      {/* Hero */}
-      <section className="bg-gradient-to-br from-brand-600 to-brand-800 text-white">
-        <div className="max-w-7xl mx-auto px-4 py-14 text-center">
-          <h1 className="text-3xl sm:text-5xl font-extrabold mb-2">BuyNexa</h1>
-          <p className="text-lg sm:text-xl text-brand-100">Har Zaroorat, Ek Jagah.</p>
-          <p className="mt-4 text-brand-100 max-w-xl mx-auto">
-            Shop everything you need — no login, no signup. Just browse, order, and pay securely.
-          </p>
+      {/* Premium Hero */}
+      <section className="relative overflow-hidden">
+        <img src="/home-banner.png" alt="BuyNexa - Har Zaroorat, Ek Jagah" className="w-full h-[280px] sm:h-[400px] lg:h-[500px] object-cover" />
+        <div className="absolute inset-0 bg-black/35 flex items-center">
+          <div className="max-w-7xl mx-auto w-full px-5 sm:px-8">
+            <div className="max-w-xl text-white">
+              <p className="text-sm sm:text-base font-semibold tracking-[0.2em] uppercase mb-2">Smart Shopping • Better Living</p>
+              <h1 className="text-4xl sm:text-6xl font-extrabold mb-3">BuyNexa</h1>
+              <p className="text-xl sm:text-2xl font-semibold">Har Zaroorat, Ek Jagah.</p>
+              <p className="mt-3 text-sm sm:text-base text-white/90 max-w-md">Shop everything you need — simple, secure and hassle-free.</p>
+              <Link href="#featured-products" className="inline-block mt-5 rounded-lg bg-white px-6 py-3 font-bold text-brand-800 shadow-lg hover:bg-gray-100 transition">Shop Now</Link>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -86,9 +91,11 @@ export default async function HomePage({ searchParams }: { searchParams: { searc
         </div>
       </section>
 
+      <div id="featured-products">
       <ProductSection title="Featured Products" products={serializeProducts(featured)} />
       <ProductSection title="Latest Arrivals" products={serializeProducts(latest)} />
       <ProductSection title="Best Sellers" products={serializeProducts(bestsellers)} />
+      </div>
     </div>
   );
 }
