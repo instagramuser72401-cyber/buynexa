@@ -57,7 +57,7 @@ export default function AdminCouponsPage() {
 
   return (
     <div className="p-6 sm:p-8">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
         <h1 className="text-2xl font-bold">Coupons</h1>
         <button onClick={() => setShowForm((s) => !s)} className="btn-primary !px-4 !py-2 text-sm">
           {showForm ? "Cancel" : "+ Add Coupon"}
