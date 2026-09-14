@@ -23,25 +23,41 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }
 
   return (
-    <div className="flex min-h-screen">
-      <aside className="w-56 bg-brand-900 text-white shrink-0 hidden sm:flex flex-col">
-        <div className="p-5 font-bold text-lg border-b border-brand-800">BuyNexa Admin</div>
-        <nav className="flex-1 p-3 space-y-1">
-          {NAV.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`block px-3 py-2 rounded-lg text-sm ${pathname === item.href ? "bg-brand-700 font-medium" : "hover:bg-brand-800 text-brand-100"}`}
-            >
-              {item.label}
-            </Link>
-          ))}
+    <div className="min-h-screen bg-gray-50">
+      <header className="bg-brand-900 text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+          <Link href="/admin/dashboard" className="font-bold text-lg">
+            BuyNexa Admin
+          </Link>
+
+          <button
+            onClick={handleLogout}
+            className="text-sm text-brand-100 hover:text-white px-3 py-2"
+          >
+            Log out
+          </button>
+        </div>
+
+        <nav className="max-w-7xl mx-auto px-3 pb-3 overflow-x-auto">
+          <div className="flex gap-2 min-w-max">
+            {NAV.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`px-3 py-2 rounded-lg text-sm whitespace-nowrap ${
+                  pathname === item.href
+                    ? "bg-brand-700 font-medium"
+                    : "text-brand-100 hover:bg-brand-800"
+                }`}
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
         </nav>
-        <button onClick={handleLogout} className="m-3 text-sm text-brand-200 hover:text-white text-left px-3 py-2">
-          Log out
-        </button>
-      </aside>
-      <div className="flex-1 bg-gray-50">{children}</div>
+      </header>
+
+      <main className="w-full">{children}</main>
     </div>
   );
 }
