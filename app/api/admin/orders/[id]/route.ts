@@ -54,8 +54,14 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
 
   if (!order) return NextResponse.json({ error: "Order not found" }, { status: 404 });
 
-  await prisma.order.delete({
-    where: { id: params.id },
+  await prisma.$transaction(async (tx) => {
+    await tx.payment.deleteMany({
+      where: { orderId: params.id },
+    });
+
+    await tx.order.delete({
+      where: { id: params.id },
+    });
   });
 
   return NextResponse.json({ success: true });
