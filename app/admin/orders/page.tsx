@@ -43,6 +43,14 @@ export default function AdminOrdersPage() {
   }, [filters]);
 
   useEffect(() => { fetchOrders(); }, [fetchOrders]);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchOrders();
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, [fetchOrders]);
+
 
 
   useEffect(() => {
