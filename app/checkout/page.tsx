@@ -201,7 +201,18 @@ export default function CheckoutPage() {
           <span>Subtotal</span>
           <span>₹{subtotal}</span>
         </div>
-        <p className="text-xs text-gray-400 mt-2">Delivery charge & any discount shown on payment screen.</p>
+        <div className="mt-3 rounded-lg bg-gray-50 p-3 text-sm">
+  <p className="font-semibold text-gray-900">
+    Final Price = Product Price + Delivery Charge
+  </p>
+  <p className="mt-1 text-gray-600">
+    Jo total amount yahan show hoga, wahi final payable amount hai.
+    Delivery charge isi total mein included hai.
+  </p>
+  <p className="mt-1 font-semibold text-red-600">
+    Order cancel karne par ₹59 delivery/cancellation charge compulsory pay karna hoga.
+  </p>
+</div>
       </div>
     </div>
   );

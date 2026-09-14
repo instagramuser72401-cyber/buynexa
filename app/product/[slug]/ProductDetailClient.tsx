@@ -91,6 +91,20 @@ export default function ProductDetailClient({ product, related }: { product: Pro
             <button onClick={buyNow} disabled={outOfStock} className="btn-accent flex-1">Buy Now</button>
           </div>
 
+          <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm">
+            <p className="font-bold text-gray-900">Important Rules</p>
+            <p className="mt-1 text-gray-700">
+              Product par jo price dikh raha hai, wahi final payable price hai.
+              Delivery charge isi price mein included hai.
+            </p>
+            <p className="mt-1 font-semibold text-red-600">
+              Example: Product ₹399 = Final Payable ₹399 (delivery charge included).
+            </p>
+            <p className="mt-1 font-semibold text-red-600">
+              Order cancel karne par ₹59 delivery/cancellation charge compulsory pay karna hoga.
+            </p>
+          </div>
+
           {product.specifications?.length > 0 && (
             <div className="mt-8">
               <h2 className="font-semibold mb-2">Specifications</h2>

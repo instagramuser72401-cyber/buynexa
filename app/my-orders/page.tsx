@@ -7,6 +7,9 @@ export default function MyOrdersPage() {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [cancelOrderId, setCancelOrderId] = useState<string | null>(null);
+  const [cancelTransactionId, setCancelTransactionId] = useState("");
+  const [cancelLoading, setCancelLoading] = useState(false);
 
   async function findOrders(e: React.FormEvent) {
     e.preventDefault();
@@ -34,13 +37,30 @@ export default function MyOrdersPage() {
     }
   }
 
-  async function cancelOrder(orderId: string) {
-    const confirmed = window.confirm("Are you sure you want to cancel this order?");
-    if (!confirmed) return;
+  function cancelOrder(orderId: string) {
+    setError("");
+    setCancelTransactionId("");
+    setCancelOrderId(orderId);
+  }
+
+  async function confirmCancellation() {
+    if (!cancelOrderId) return;
+
+    if (!cancelTransactionId.trim()) {
+      setError("Please enter the ₹59 payment Transaction ID / UTR.");
+      return;
+    }
+
+    setCancelLoading(true);
+    setError("");
 
     try {
-      const res = await fetch(`/api/orders/${orderId}/cancel`, {
+      const res = await fetch(`/api/orders/${cancelOrderId}/cancel`, {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          transactionId: cancelTransactionId.trim(),
+        }),
       });
 
       const data = await res.json();
@@ -51,13 +71,18 @@ export default function MyOrdersPage() {
 
       setOrders((current) =>
         current.map((order) =>
-          order.id === orderId
+          order.id === cancelOrderId
             ? { ...order, orderStatus: "CANCELLED" }
             : order
         )
       );
+
+      setCancelOrderId(null);
+      setCancelTransactionId("");
     } catch (err: any) {
       setError(err.message || "Unable to cancel order");
+    } finally {
+      setCancelLoading(false);
     }
   }
 
@@ -159,9 +184,19 @@ export default function MyOrdersPage() {
                   )}
                 </div>
 
-                <p className="mt-3 text-sm font-semibold text-red-600">
-                  No Return
-                </p>
+                <div className="mt-3 rounded-lg bg-red-50 p-3 text-sm">
+                  <p className="font-bold text-red-600">Cancellation Rules</p>
+                  <p className="mt-1 font-semibold text-gray-700">
+                    Product price mein delivery charge already included hai.
+                  </p>
+                  <p className="mt-1 font-semibold text-red-600">
+                    Order cancel karne par ₹59 delivery/cancellation charge compulsory pay karna hoga.
+                  </p>
+                  <p className="mt-1 text-gray-700">
+                    Cancellation se pehle QR par exactly ₹59 pay karke Transaction ID / UTR submit karna hoga.
+                  </p>
+                  <p className="mt-1 font-semibold text-gray-700">No Return</p>
+                </div>
               </div>
 
               {order.orderStatus === "PLACED" && (
@@ -176,6 +211,63 @@ export default function MyOrdersPage() {
             </div>
           ))}
         </div>
+
+        {cancelOrderId && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl">
+              <h2 className="text-xl font-bold">Cancel Order — ₹59 Payment</h2>
+
+              <p className="mt-2 text-sm text-gray-600">
+                Order cancel karne se pehle ₹59 delivery/cancellation charges
+                compulsory pay karna padega.
+              </p>
+
+              <div className="mt-4 flex justify-center rounded-xl border bg-white p-4">
+                <img
+                  src="/payment-qr.png"
+                  alt="₹59 Cancellation Payment QR"
+                  className="h-64 w-64 object-contain"
+                />
+              </div>
+
+              <p className="mt-3 text-center text-sm font-semibold">
+                QR scan karke exactly ₹59 pay karein.
+              </p>
+
+              <input
+                type="text"
+                value={cancelTransactionId}
+                onChange={(e) => setCancelTransactionId(e.target.value)}
+                placeholder="Enter ₹59 payment Transaction ID / UTR"
+                className="mt-4 w-full rounded-lg border px-4 py-3 outline-none focus:ring-2 focus:ring-black"
+              />
+
+              <div className="mt-4 flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCancelOrderId(null);
+                    setCancelTransactionId("");
+                    setError("");
+                  }}
+                  disabled={cancelLoading}
+                  className="flex-1 rounded-lg border px-4 py-3 font-semibold"
+                >
+                  Back
+                </button>
+
+                <button
+                  type="button"
+                  onClick={confirmCancellation}
+                  disabled={cancelLoading}
+                  className="flex-1 rounded-lg bg-red-600 px-4 py-3 font-semibold text-white disabled:opacity-50"
+                >
+                  {cancelLoading ? "Cancelling..." : "Pay ₹59 & Cancel"}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </main>
   );
