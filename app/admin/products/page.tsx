@@ -13,6 +13,7 @@ export default function AdminProductsPage() {
   const [categories, setCategories] = useState<any[]>([]);
   const [form, setForm] = useState(emptyForm);
   const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState("");
 
   async function loadData() {
@@ -51,6 +52,65 @@ export default function AdminProductsPage() {
     loadData();
   }
 
+  async function handleEdit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editingId) return;
+    setError("");
+    const res = await fetch(`/api/admin/products/${editingId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: form.name,
+        description: form.description,
+        price: Number(form.price),
+        originalPrice: Number(form.originalPrice),
+        stock: Number(form.stock),
+        lowStockAlertAt: Number(form.lowStockAlertAt),
+        categoryId: form.categoryId,
+        isFeatured: form.isFeatured,
+        isBestseller: form.isBestseller,
+        isEnabled: form.isEnabled,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      setError(data.error || "Could not update product");
+      return;
+    }
+    setForm(emptyForm);
+    setEditingId(null);
+    setShowForm(false);
+    loadData();
+  }
+
+  function startEdit(p: any) {
+    setEditingId(p.id);
+    setForm({
+      sku: p.sku || "",
+      name: p.name || "",
+      slug: p.slug || "",
+      description: p.description || "",
+      price: String(p.price ?? ""),
+      originalPrice: String(p.originalPrice ?? ""),
+      stock: String(p.stock ?? ""),
+      lowStockAlertAt: String(p.lowStockAlertAt ?? 5),
+      categoryId: p.categoryId || "",
+      images: Array.isArray(p.images) ? p.images.join(", ") : "",
+      isFeatured: !!p.isFeatured,
+      isBestseller: !!p.isBestseller,
+      isEnabled: p.isEnabled !== false,
+    });
+    setError("");
+    setShowForm(true);
+  }
+
+  function cancelForm() {
+    setForm(emptyForm);
+    setEditingId(null);
+    setError("");
+    setShowForm(false);
+  }
+
   async function toggleField(id: string, field: string, value: boolean) {
     await fetch(`/api/admin/products/${id}`, {
       method: "PATCH",
@@ -70,13 +130,13 @@ export default function AdminProductsPage() {
     <div className="p-6 sm:p-8">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-4">
         <h1 className="text-2xl font-bold">Products</h1>
-        <button onClick={() => setShowForm((s) => !s)} className="bg-green-600 text-white px-5 py-3 rounded-lg font-bold cursor-pointer shadow-md">
+        <button onClick={() => editingId ? cancelForm() : setShowForm((s) => !s)} className="bg-green-600 text-white px-5 py-3 rounded-lg font-bold cursor-pointer shadow-md">
           {showForm ? "Cancel" : "＋ Add Product"}
         </button>
       </div>
 
       {showForm && (
-        <form onSubmit={handleCreate} className="card p-5 mb-6 grid sm:grid-cols-2 gap-3">
+        <form onSubmit={editingId ? handleEdit : handleCreate} className="card p-5 mb-6 grid sm:grid-cols-2 gap-3">
           <input required placeholder="SKU" className="input" value={form.sku} onChange={(e) => setForm((f) => ({ ...f, sku: e.target.value }))} />
           <input required placeholder="Name" className="input" value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} />
           <input required placeholder="Slug (url-friendly)" className="input" value={form.slug} onChange={(e) => setForm((f) => ({ ...f, slug: e.target.value }))} />
@@ -93,7 +153,7 @@ export default function AdminProductsPage() {
           <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.isFeatured} onChange={(e) => setForm((f) => ({ ...f, isFeatured: e.target.checked }))} /> Featured</label>
           <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.isBestseller} onChange={(e) => setForm((f) => ({ ...f, isBestseller: e.target.checked }))} /> Bestseller</label>
           {error && <p className="text-red-600 text-sm sm:col-span-2">{error}</p>}
-          <button type="submit" className="btn-primary sm:col-span-2">Create Product</button>
+          <button type="submit" className="btn-primary sm:col-span-2">{editingId ? "Save Changes" : "Create Product"}</button>
         </form>
       )}
 
@@ -119,7 +179,7 @@ export default function AdminProductsPage() {
                 <td className="p-3"><input type="checkbox" checked={p.isFeatured} onChange={(e) => toggleField(p.id, "isFeatured", e.target.checked)} /></td>
                 <td className="p-3"><input type="checkbox" checked={p.isBestseller} onChange={(e) => toggleField(p.id, "isBestseller", e.target.checked)} /></td>
                 <td className="p-3"><input type="checkbox" checked={p.isEnabled} onChange={(e) => toggleField(p.id, "isEnabled", e.target.checked)} /></td>
-                <td className="p-3"><button onClick={() => deleteProduct(p.id)} className="text-red-500 hover:underline">Delete</button></td>
+                <td className="p-3"><div className="flex gap-3"><button onClick={() => startEdit(p)} className="text-blue-600 hover:underline">Edit</button><button onClick={() => deleteProduct(p.id)} className="text-red-500 hover:underline">Delete</button></div></td>
               </tr>
             ))}
           </tbody>
