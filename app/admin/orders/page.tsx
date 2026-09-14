@@ -34,7 +34,7 @@ export default function AdminOrdersPage() {
     <div className="p-6 sm:p-8">
       <h1 className="text-2xl font-bold mb-4">Orders</h1>
 
-      <div className="card p-4 mb-4 grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="card p-4 mb-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <input placeholder="Order ID" className="input !py-2 text-sm" value={filters.orderNumber} onChange={(e) => setFilters((f) => ({ ...f, orderNumber: e.target.value }))} />
         <input placeholder="Customer name" className="input !py-2 text-sm" value={filters.customerName} onChange={(e) => setFilters((f) => ({ ...f, customerName: e.target.value }))} />
         <input placeholder="Phone" className="input !py-2 text-sm" value={filters.customerPhone} onChange={(e) => setFilters((f) => ({ ...f, customerPhone: e.target.value }))} />
