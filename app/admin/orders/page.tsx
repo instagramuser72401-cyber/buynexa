@@ -6,13 +6,31 @@ const STATUSES = ["PLACED", "PAYMENT_CONFIRMED", "PROCESSING", "PACKED", "SHIPPE
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<any[]>([]);
-  const [filters, setFilters] = useState({ orderNumber: "", customerName: "", customerPhone: "", city: "", pincode: "", orderStatus: "", paymentStatus: "" });
+  const [filters, setFilters] = useState({ orderNumber: "", customerName: "", customerPhone: "", city: "", pincode: "", orderStatus: "", paymentStatus: "", period: "" });
   const [expanded, setExpanded] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   const fetchOrders = useCallback(async () => {
     setLoading(true);
-    const params = new URLSearchParams(Object.entries(filters).filter(([, v]) => v) as any);
+    const { period, ...apiFilters } = filters;
+    const params = new URLSearchParams(Object.entries(apiFilters).filter(([, v]) => v) as any);
+    if (period) {
+      const now = new Date();
+      const from = new Date(now);
+      if (period === "today") {
+        from.setHours(0, 0, 0, 0);
+      } else if (period === "week") {
+        const day = from.getDay();
+        const diff = day === 0 ? 6 : day - 1;
+        from.setDate(from.getDate() - diff);
+        from.setHours(0, 0, 0, 0);
+      } else if (period === "month") {
+        from.setDate(1);
+        from.setHours(0, 0, 0, 0);
+      }
+      params.set("dateFrom", from.toISOString());
+      params.set("dateTo", now.toISOString());
+    }
     const res = await fetch(`/api/admin/orders?${params.toString()}`);
     const data = await res.json();
     setOrders(data.orders || []);
@@ -40,6 +58,12 @@ export default function AdminOrdersPage() {
         <input placeholder="Phone" className="input !py-2 text-sm" value={filters.customerPhone} onChange={(e) => setFilters((f) => ({ ...f, customerPhone: e.target.value }))} />
         <input placeholder="City" className="input !py-2 text-sm" value={filters.city} onChange={(e) => setFilters((f) => ({ ...f, city: e.target.value }))} />
         <input placeholder="Pincode" className="input !py-2 text-sm" value={filters.pincode} onChange={(e) => setFilters((f) => ({ ...f, pincode: e.target.value }))} />
+        <select className="input !py-2 text-sm" value={filters.period} onChange={(e) => setFilters((f) => ({ ...f, period: e.target.value }))}>
+          <option value="">All orders</option>
+          <option value="today">Today</option>
+          <option value="week">This Week</option>
+          <option value="month">This Month</option>
+        </select>
         <select className="input !py-2 text-sm" value={filters.orderStatus} onChange={(e) => setFilters((f) => ({ ...f, orderStatus: e.target.value }))}>
           <option value="">Any order status</option>
           {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
