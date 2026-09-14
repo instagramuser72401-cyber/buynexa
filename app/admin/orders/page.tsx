@@ -15,9 +15,11 @@ export default function AdminOrdersPage() {
     setLoading(true);
     const { period, ...apiFilters } = filters;
     const params = new URLSearchParams(Object.entries(apiFilters).filter(([, v]) => v) as any);
+
     if (period) {
       const now = new Date();
       const from = new Date(now);
+
       if (period === "today") {
         from.setHours(0, 0, 0, 0);
       } else if (period === "week") {
@@ -29,37 +31,40 @@ export default function AdminOrdersPage() {
         from.setDate(1);
         from.setHours(0, 0, 0, 0);
       }
+
       params.set("dateFrom", from.toISOString());
       params.set("dateTo", now.toISOString());
     }
+
     const res = await fetch(`/api/admin/orders?${params.toString()}`);
     const data = await res.json();
     setOrders(data.orders || []);
     setLoading(false);
   }, [filters]);
 
-  useEffect(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem("buynexa-new-order-ids") || "[]");
-      setNewOrderIds(Array.isArray(saved) ? saved : []);
-    } catch {
-      setNewOrderIds([]);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!loading && orders.length > 0) {
-      const knownIds = new Set(newOrderIds);
-      const storedIds = orders.map((o) => o.id).filter((id) => !knownIds.has(id));
-      if (storedIds.length > 0) {
-        const updated = [...newOrderIds, ...storedIds];
-        setNewOrderIds(updated);
-        localStorage.setItem("buynexa-new-order-ids", JSON.stringify(updated));
-      }
-    }
-  }, [orders, loading, newOrderIds]);
-
   useEffect(() => { fetchOrders(); }, [fetchOrders]);
+
+
+  useEffect(() => {
+    if (loading || orders.length === 0) return;
+
+    const newestOrderIds = orders
+      .filter((order) => Date.now() - new Date(order.createdAt).getTime() <= 5 * 60 * 1000)
+      .map((order) => order.id);
+
+    const saved = new Set(newOrderIds);
+    const updated = [...newOrderIds];
+
+    newestOrderIds.forEach((id) => {
+      if (!saved.has(id)) updated.push(id);
+    });
+
+    if (updated.length !== newOrderIds.length) {
+      setNewOrderIds(updated);
+      localStorage.setItem("buynexa-new-order-ids", JSON.stringify(updated));
+    }
+  }, [orders, loading]);
+
 
   async function updateStatus(orderId: string, orderStatus: string) {
     await fetch(`/api/admin/orders/${orderId}`, {
