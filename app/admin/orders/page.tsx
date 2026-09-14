@@ -48,6 +48,21 @@ export default function AdminOrdersPage() {
     fetchOrders();
   }
 
+  async function deleteOrder(orderId: string, orderNumber: string) {
+    if (!confirm(`Delete order ${orderNumber}? This cannot be undone.`)) return;
+
+    const res = await fetch(`/api/admin/orders/${orderId}`, {
+      method: "DELETE",
+    });
+
+    if (res.ok) {
+      setExpanded(null);
+      fetchOrders();
+    } else {
+      alert("Could not delete order.");
+    }
+  }
+
   return (
     <div className="p-6 sm:p-8">
       <h1 className="text-2xl font-bold mb-4">Orders</h1>
@@ -127,6 +142,14 @@ export default function AdminOrdersPage() {
                         {STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
                       </select>
                     </div>
+
+                    <button
+                      type="button"
+                      onClick={() => deleteOrder(order.id, order.orderNumber)}
+                      className="mt-4 bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold"
+                    >
+                      Delete Order
+                    </button>
                   </div>
                 </div>
               )}

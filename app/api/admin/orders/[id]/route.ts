@@ -41,3 +41,22 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
   return NextResponse.json({ order });
 }
+
+    
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+  const admin = requireAdmin(req);
+  if (!admin) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const order = await prisma.order.findUnique({
+    where: { id: params.id },
+    select: { id: true },
+  });
+
+  if (!order) return NextResponse.json({ error: "Order not found" }, { status: 404 });
+
+  await prisma.order.delete({
+    where: { id: params.id },
+  });
+
+  return NextResponse.json({ success: true });
+}
