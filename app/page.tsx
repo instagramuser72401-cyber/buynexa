@@ -64,19 +64,8 @@ export default async function HomePage({ searchParams }: { searchParams: { searc
   return (
     <div>
       {/* Premium Hero */}
-      <section className="relative overflow-hidden">
-        <img src="/home-banner.png" alt="BuyNexa - Har Zaroorat, Ek Jagah" className="w-full h-[280px] sm:h-[400px] lg:h-[500px] object-cover" />
-        <div className="absolute inset-0 bg-black/35 flex items-center">
-          <div className="max-w-7xl mx-auto w-full px-5 sm:px-8">
-            <div className="max-w-xl text-white">
-              <p className="text-sm sm:text-base font-semibold tracking-[0.2em] uppercase mb-2">Smart Shopping • Better Living</p>
-              <h1 className="text-4xl sm:text-6xl font-extrabold mb-3">BuyNexa</h1>
-              <p className="text-xl sm:text-2xl font-semibold">Har Zaroorat, Ek Jagah.</p>
-              <p className="mt-3 text-sm sm:text-base text-white/90 max-w-md">Shop everything you need — simple, secure and hassle-free.</p>
-              <Link href="#featured-products" className="inline-block mt-5 rounded-lg bg-white px-6 py-3 font-bold text-brand-800 shadow-lg hover:bg-gray-100 transition">Shop Now</Link>
-            </div>
-          </div>
-        </div>
+      <section>
+        <img src="/home-banner.png" alt="BuyNexa" className="w-full h-auto block" />
       </section>
 
       {/* Categories */}
