@@ -65,7 +65,7 @@ export default function AdminCategoriesPage() {
         <button type="submit" className="btn-primary sm:col-span-3">Add Category</button>
       </form>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {categories.map((c) => (
           <div key={c.id} className="card p-4 text-center">
             {c.imageUrl && <img src={c.imageUrl} alt={c.name} className="w-10 h-10 mx-auto mb-2 object-contain" />}
