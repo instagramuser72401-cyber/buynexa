@@ -59,7 +59,7 @@ export default function Header() {
           <button
             type="button"
             onClick={() => setMenuOpen(!menuOpen)}
-            className="sm:hidden w-10 h-10 flex items-center justify-center rounded-lg border border-gray-200 text-gray-700"
+            className="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-200 text-gray-700"
             aria-label="Open menu"
           >
             <span className="text-2xl leading-none">☰</span>
@@ -80,7 +80,7 @@ export default function Header() {
       </form>
 
       {menuOpen && (
-        <div className="sm:hidden border-t border-gray-100 bg-white shadow-lg">
+        <div className="border-t border-gray-100 bg-white shadow-lg">
           <nav className="px-4 py-3 space-y-1">
             <Link
               href="/"
@@ -91,7 +91,7 @@ export default function Header() {
             </Link>
 
             <Link
-              href="/track-order"
+              href="/my-orders"
               onClick={() => setMenuOpen(false)}
               className="block px-3 py-3 rounded-lg hover:bg-gray-50 font-medium"
             >

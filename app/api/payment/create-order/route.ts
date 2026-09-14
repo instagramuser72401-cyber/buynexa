@@ -16,6 +16,7 @@ const CheckoutSchema = z.object({
   pincode: z.string().regex(/^\d{6}$/, "Enter a valid 6-digit pincode"),
   country: z.string().min(2).max(60).default("India"),
   paymentMethod: z.enum(["COD", "ONLINE"]),
+  transactionId: z.string().trim().max(100).optional().or(z.literal("")),
   items: z
     .array(z.object({
       productId: z.string(),
@@ -162,6 +163,9 @@ export async function POST(req: NextRequest) {
             amount: totalAmount,
             status: "PENDING",
             method: "qr",
+            customerName: body.customerName,
+            customerPhone: body.customerPhone,
+            transactionId: body.transactionId || null,
           },
         },
       },

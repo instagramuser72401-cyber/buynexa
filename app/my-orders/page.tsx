@@ -34,6 +34,33 @@ export default function MyOrdersPage() {
     }
   }
 
+  async function cancelOrder(orderId: string) {
+    const confirmed = window.confirm("Are you sure you want to cancel this order?");
+    if (!confirmed) return;
+
+    try {
+      const res = await fetch(`/api/orders/${orderId}/cancel`, {
+        method: "POST",
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Unable to cancel order");
+      }
+
+      setOrders((current) =>
+        current.map((order) =>
+          order.id === orderId
+            ? { ...order, orderStatus: "CANCELLED" }
+            : order
+        )
+      );
+    } catch (err: any) {
+      setError(err.message || "Unable to cancel order");
+    }
+  }
+
   return (
     <main className="min-h-screen bg-gray-50 px-4 py-8">
       <div className="mx-auto max-w-3xl">
@@ -101,19 +128,51 @@ export default function MyOrdersPage() {
                     className="flex justify-between gap-3 text-sm"
                   >
                     <span>
-                      {item.name} × {item.quantity}
+                      {item.productName} × {item.quantity}
                     </span>
                     <span className="font-medium">
-                      ₹{Number(item.price) * item.quantity}
+                      ₹{Number(item.unitPrice) * item.quantity}
                     </span>
                   </div>
                 ))}
               </div>
 
-              <div className="mt-4 flex justify-between border-t pt-3 font-bold">
-                <span>Total</span>
-                <span>₹{Number(order.totalAmount)}</span>
+              <div className="mt-4 border-t pt-3">
+                <div className="flex justify-between font-bold">
+                  <span>Total</span>
+                  <span>₹{Number(order.totalAmount)}</span>
+                </div>
+
+                <div className="mt-3 rounded-lg bg-gray-50 p-3 text-sm">
+                  <p>
+                    <span className="font-semibold">Payment:</span>{" "}
+                    {order.payment?.method === "qr"
+                      ? "Online Payment / QR"
+                      : "Cash on Delivery (COD)"}
+                  </p>
+
+                  {order.payment?.method === "qr" && order.payment?.transactionId && (
+                    <p className="mt-1">
+                      <span className="font-semibold">Transaction ID / UTR:</span>{" "}
+                      {order.payment.transactionId}
+                    </p>
+                  )}
+                </div>
+
+                <p className="mt-3 text-sm font-semibold text-red-600">
+                  No Return
+                </p>
               </div>
+
+              {order.orderStatus === "PLACED" && (
+                <button
+                  type="button"
+                  onClick={() => cancelOrder(order.id)}
+                  className="mt-4 w-full rounded-lg border border-red-300 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50"
+                >
+                  Cancel Order
+                </button>
+              )}
             </div>
           ))}
         </div>

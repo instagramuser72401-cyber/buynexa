@@ -155,7 +155,10 @@ model Payment {
   razorpaySignature String?
   amount            Decimal       @db.Decimal(10, 2)
   status            PaymentStatus @default(PENDING)
-  method            String?       // upi | card | netbanking | wallet
+  method            String?       // cod | qr
+  customerName      String?
+  customerPhone     String?
+  transactionId     String?
   createdAt         DateTime      @default(now())
   verifiedAt        DateTime?
 }
