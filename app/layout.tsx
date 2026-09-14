@@ -29,6 +29,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <div className="max-w-7xl mx-auto px-4 text-sm">
               <p className="font-bold text-white text-lg">BuyNexa</p>
               <p className="text-brand-200 mb-4">Har Zaroorat, Ek Jagah.</p>
+              <div className="mb-4 flex flex-wrap gap-4">
+                <a href="/terms" className="text-brand-200 hover:text-white underline">
+                  Terms & Conditions
+                </a>
+              </div>
               <p className="text-brand-300">&copy; {new Date().getFullYear()} BuyNexa. All rights reserved.</p>
             </div>
           </footer>
