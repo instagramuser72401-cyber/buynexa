@@ -109,7 +109,7 @@ export default async function HomePage({
       {/* Hero Banner */}
       <section className="bg-white">
         <img
-          src="/home-banner.jpg"
+          src="/home-banner.png"
           alt="BuyNexa"
           className="w-full h-auto block"
         />
