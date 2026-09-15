@@ -173,14 +173,13 @@ export default async function HomePage({
         )}
       </section>
 
-      {/* Features */}
-      <section className="bg-white border-y">
-        <div className="max-w-7xl mx-auto px-4 py-5 grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Feature icon="🚚" title="Fast Delivery" />
-          <Feature icon="🔒" title="Secure Payments" />
-          <Feature icon="↩️" title="Easy Returns" />
-          <Feature icon="💬" title="24/7 Support" />
-        </div>
+      {/* Feature Banner */}
+      <section className="bg-white">
+        <img
+          src="/feature-banner.png"
+          alt="BuyNexa"
+          className="w-full h-auto block"
+        />
       </section>
 
       {/* Top Deals */}
