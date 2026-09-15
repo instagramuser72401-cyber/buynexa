@@ -26,7 +26,7 @@ export default function Header() {
           <button
             type="button"
             onClick={() => setMenuOpen(!menuOpen)}
-            className="w-11 h-11 flex items-center justify-center rounded-xl text-white"
+            className="pointer-events-auto absolute top-2 left-2 w-11 h-11 flex items-center justify-center rounded-xl text-white bg-black/20"
             aria-label="Open menu"
           >
             <span className="text-3xl leading-none">☰</span>
@@ -34,7 +34,7 @@ export default function Header() {
 
           <Link
             href="/cart"
-            className="relative w-11 h-11 flex items-center justify-center rounded-xl text-white"
+            className="pointer-events-auto absolute top-2 right-2 w-11 h-11 flex items-center justify-center rounded-xl text-white bg-black/20"
             aria-label="Cart"
           >
             <svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -53,7 +53,7 @@ export default function Header() {
         {isHome ? (
           <form
             onSubmit={handleSearch}
-            className="absolute left-[3%] right-[3%] top-[15%]"
+            className="pointer-events-auto absolute left-[3%] right-[3%] top-[24vw]"
           >
             <input
               value={query}
