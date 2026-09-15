@@ -129,6 +129,11 @@ export default function ProductDetailClient({ product, related }: { product: Pro
             </div>
           </div>
 
+          <CountdownTimer
+            durationHours={product.discountDurationHours}
+            startedAt={product.discountStartedAt}
+          />
+
           <div className="flex items-baseline gap-3 mt-3">
             <span className="text-3xl font-extrabold">₹{product.price}</span>
             {discountPct > 0 && (
@@ -144,11 +149,6 @@ export default function ProductDetailClient({ product, related }: { product: Pro
           </p>
 
           <p className="mt-4 text-gray-600 leading-relaxed">{product.description}</p>
-
-          <CountdownTimer
-            durationHours={product.discountDurationHours}
-            startedAt={product.discountStartedAt}
-          />
 
           {!outOfStock && (
             <div className="flex items-center gap-3 mt-6">
