@@ -31,9 +31,12 @@ model Category {
   id        String    @id @default(cuid())
   name      String
   slug      String    @unique
-  imageUrl  String?
-  isActive  Boolean   @default(true)
-  products  Product[]
+  imageUrl   String?
+  offerText  String?
+  showOnHome Boolean  @default(true)
+  homeOrder  Int      @default(0)
+  isActive   Boolean  @default(true)
+  products   Product[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 }
