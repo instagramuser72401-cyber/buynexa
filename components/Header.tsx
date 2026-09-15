@@ -78,6 +78,7 @@ export default function Header() {
           <nav className="max-w-7xl mx-auto px-4 py-3 space-y-1">
             <Link href="/" onClick={() => setMenuOpen(false)} className="block px-3 py-3 rounded-lg hover:bg-gray-50 font-medium">🏠 Home</Link>
             <Link href="/my-orders" onClick={() => setMenuOpen(false)} className="block px-3 py-3 rounded-lg hover:bg-gray-50 font-medium">📦 My Orders</Link>
+            <Link href="/wishlist" onClick={() => setMenuOpen(false)} className="block px-3 py-3 rounded-lg hover:bg-gray-50 font-medium">❤️ Wishlist</Link>
             <Link href="/track-order" onClick={() => setMenuOpen(false)} className="block px-3 py-3 rounded-lg hover:bg-gray-50 font-medium">🚚 Track Order</Link>
             <Link href="/support" onClick={() => setMenuOpen(false)} className="block px-3 py-3 rounded-lg hover:bg-gray-50 font-medium">💬 Customer Support</Link>
           </nav>

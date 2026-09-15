@@ -10,7 +10,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   // Whitelist fields that can be updated to avoid mass-assignment bugs.
   const allowed = [
     "name", "description", "specifications", "price", "originalPrice",
-    "stock", "lowStockAlertAt", "categoryId", "isFeatured", "isBestseller", "isEnabled",
+    "stock", "lowStockAlertAt", "discountDurationHours", "categoryId", "isFeatured", "isBestseller", "isEnabled",
   ];
   const data: any = {};
   for (const key of allowed) if (key in updates) data[key] = updates[key];

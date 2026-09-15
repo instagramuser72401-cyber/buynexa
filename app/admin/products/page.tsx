@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 const emptyForm = {
   sku: "", name: "", slug: "", description: "", price: "", originalPrice: "",
-  stock: "", lowStockAlertAt: "5", categoryId: "", images: "", isFeatured: false,
+  stock: "", lowStockAlertAt: "5", discountDurationHours: "15", categoryId: "", images: "", isFeatured: false,
   isBestseller: false, isEnabled: true,
 };
 
@@ -39,6 +39,7 @@ export default function AdminProductsPage() {
         originalPrice: Number(form.originalPrice),
         stock: Number(form.stock),
         lowStockAlertAt: Number(form.lowStockAlertAt),
+        discountDurationHours: Number(form.discountDurationHours),
         images: form.images.split(",").map((s) => s.trim()).filter(Boolean),
       }),
     });
@@ -66,6 +67,7 @@ export default function AdminProductsPage() {
         originalPrice: Number(form.originalPrice),
         stock: Number(form.stock),
         lowStockAlertAt: Number(form.lowStockAlertAt),
+        discountDurationHours: Number(form.discountDurationHours),
         categoryId: form.categoryId,
         isFeatured: form.isFeatured,
         isBestseller: form.isBestseller,
@@ -94,6 +96,7 @@ export default function AdminProductsPage() {
       originalPrice: String(p.originalPrice ?? ""),
       stock: String(p.stock ?? ""),
       lowStockAlertAt: String(p.lowStockAlertAt ?? 5),
+      discountDurationHours: String(p.discountDurationHours ?? 15),
       categoryId: p.categoryId || "",
       images: Array.isArray(p.images) ? p.images.join(", ") : "",
       isFeatured: !!p.isFeatured,
@@ -148,6 +151,7 @@ export default function AdminProductsPage() {
           <input required type="number" placeholder="Original Price (MRP)" className="input" value={form.originalPrice} onChange={(e) => setForm((f) => ({ ...f, originalPrice: e.target.value }))} />
           <input required type="number" placeholder="Stock Quantity" className="input" value={form.stock} onChange={(e) => setForm((f) => ({ ...f, stock: e.target.value }))} />
           <input type="number" placeholder="Low Stock Alert At" className="input" value={form.lowStockAlertAt} onChange={(e) => setForm((f) => ({ ...f, lowStockAlertAt: e.target.value }))} />
+          <input type="number" min="1" placeholder="Discount Countdown (Hours)" className="input" value={form.discountDurationHours} onChange={(e) => setForm((f) => ({ ...f, discountDurationHours: e.target.value }))} />
           <textarea required placeholder="Description" className="input sm:col-span-2" value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} />
           <input required type="url" placeholder="Image URL (https://...)" className="input sm:col-span-2" value={form.images} onChange={(e) => setForm((f) => ({ ...f, images: e.target.value }))} />
           <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={form.isFeatured} onChange={(e) => setForm((f) => ({ ...f, isFeatured: e.target.checked }))} /> Featured</label>

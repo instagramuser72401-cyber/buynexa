@@ -1,25 +1,71 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/context/CartContext";
+import CountdownTimer from "./CountdownTimer";
 
 type Product = {
   id: string; slug: string; name: string; description: string;
   specifications: { key: string; value: string }[];
-  price: number; originalPrice: number; stock: number; images: string[]; category: string;
+  price: number; originalPrice: number; stock: number; images: string[]; category: string; discountDurationHours: number | null; discountStartedAt: string | null;
 };
 
 export default function ProductDetailClient({ product, related }: { product: Product; related: any[] }) {
   const [qty, setQty] = useState(1);
   const [activeImg, setActiveImg] = useState(0);
+  const [isWishlisted, setIsWishlisted] = useState(false);
   const { addItem } = useCart();
   const router = useRouter();
 
   const discountPct = Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
   const outOfStock = product.stock <= 0;
+
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem("buynexa-wishlist") || "[]");
+      setIsWishlisted(saved.some((item: any) => item.id === product.id));
+    } catch {}
+  }, [product.id]);
+
+  function toggleWishlist() {
+    const saved = JSON.parse(localStorage.getItem("buynexa-wishlist") || "[]");
+    const exists = saved.some((item: any) => item.id === product.id);
+
+    const next = exists
+      ? saved.filter((item: any) => item.id !== product.id)
+      : [
+          ...saved,
+          {
+            id: product.id,
+            slug: product.slug,
+            name: product.name,
+            price: product.price,
+            originalPrice: product.originalPrice,
+            image: product.images[0],
+          },
+        ];
+
+    localStorage.setItem("buynexa-wishlist", JSON.stringify(next));
+    setIsWishlisted(!exists);
+  }
+
+  async function shareProduct() {
+    const url = window.location.href;
+
+    if (navigator.share) {
+      await navigator.share({
+        title: product.name,
+        text: `Check out ${product.name} on BuyNexa`,
+        url,
+      });
+    } else {
+      await navigator.clipboard.writeText(url);
+      alert("Product link copied!");
+    }
+  }
 
   function addToCart() {
     addItem(
@@ -57,7 +103,31 @@ export default function ProductDetailClient({ product, related }: { product: Pro
 
         <div>
           <p className="text-sm text-brand-600 font-medium">{product.category}</p>
-          <h1 className="text-2xl font-bold mt-1">{product.name}</h1>
+          <div className="flex items-start justify-between gap-3">
+            <h1 className="text-2xl font-bold mt-1">{product.name}</h1>
+            <div className="flex items-center gap-2 shrink-0">
+              <button
+                type="button"
+                onClick={shareProduct}
+                aria-label="Share product"
+                className="h-10 px-3 rounded-xl border border-gray-200 bg-white text-sm font-semibold shadow-sm hover:bg-gray-50"
+              >
+                ↗️ Share
+              </button>
+              <button
+                type="button"
+                onClick={toggleWishlist}
+                aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+                className={`h-10 w-10 rounded-xl border flex items-center justify-center text-xl shadow-sm ${
+                  isWishlisted
+                    ? "border-red-300 bg-red-50 text-red-600"
+                    : "border-gray-200 bg-white text-gray-500 hover:text-red-500"
+                }`}
+              >
+                {isWishlisted ? "♥" : "♡"}
+              </button>
+            </div>
+          </div>
 
           <div className="flex items-baseline gap-3 mt-3">
             <span className="text-3xl font-extrabold">₹{product.price}</span>
@@ -74,6 +144,11 @@ export default function ProductDetailClient({ product, related }: { product: Pro
           </p>
 
           <p className="mt-4 text-gray-600 leading-relaxed">{product.description}</p>
+
+          <CountdownTimer
+            durationHours={product.discountDurationHours}
+            startedAt={product.discountStartedAt}
+          />
 
           {!outOfStock && (
             <div className="flex items-center gap-3 mt-6">

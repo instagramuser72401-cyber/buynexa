@@ -63,6 +63,8 @@ export default async function ProductPage({ params }: { params: { slug: string }
           price: Number(product.price),
           originalPrice: Number(product.originalPrice),
           stock: product.stock,
+          discountDurationHours: product.discountDurationHours,
+          discountStartedAt: product.discountStartedAt?.toISOString() || null,
           images: product.images.map((i) => i.url),
           category: product.category.name,
         }}
