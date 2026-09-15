@@ -26,22 +26,18 @@ export default function Header() {
           <button
             type="button"
             onClick={() => setMenuOpen(!menuOpen)}
-            className="pointer-events-auto absolute top-2 left-2 w-11 h-11 flex items-center justify-center rounded-xl text-white bg-black/20"
+            className="pointer-events-auto absolute top-[3.5vw] left-[3%] w-[9vw] h-[9vw] max-w-14 max-h-14 bg-transparent text-transparent"
             aria-label="Open menu"
           >
-            <span className="text-3xl leading-none">☰</span>
+            <span className="sr-only">Menu</span>
           </button>
 
           <Link
             href="/cart"
-            className="pointer-events-auto absolute top-2 right-2 w-11 h-11 flex items-center justify-center rounded-xl text-white bg-black/20"
+            className="pointer-events-auto absolute top-[3.5vw] right-[3%] w-[9vw] h-[9vw] max-w-14 max-h-14 bg-transparent text-transparent"
             aria-label="Cart"
           >
-            <svg width="27" height="27" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M3 3h2l.4 2M7 13h10l3-8H5.4M7 13L5.4 5M7 13l-2.3 4.6A1 1 0 0 0 5.6 19H17" />
-              <circle cx="9" cy="21" r="1" />
-              <circle cx="17" cy="21" r="1" />
-            </svg>
+            <span className="sr-only">Cart</span>
             {totalQuantity > 0 && (
               <span className="absolute top-0 right-0 bg-orange-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                 {totalQuantity}
