@@ -34,7 +34,7 @@ export default function Header() {
 
           <Link
             href="/cart"
-            className="pointer-events-auto absolute top-[3.5vw] right-[3%] w-[9vw] h-[9vw] max-w-14 max-h-14 bg-transparent text-transparent"
+            className="pointer-events-auto absolute top-[3.5vw] right-[1%] w-[14vw] h-[10vw] max-w-14 max-h-14 bg-transparent text-transparent"
             aria-label="Cart"
           >
             <span className="sr-only">Cart</span>
