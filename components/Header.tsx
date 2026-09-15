@@ -18,70 +18,74 @@ export default function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-gray-100">
-      <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
-        <Link href="/" className="flex flex-col leading-tight shrink-0">
-          <span className="text-2xl font-extrabold text-brand-700">BuyNexa</span>
-          <span className="text-[11px] text-gray-500 -mt-1">Har Zaroorat, Ek Jagah.</span>
-        </Link>
-
-        <form onSubmit={handleSearch} className="flex-1 hidden sm:flex">
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search for products..."
-            className="input rounded-r-none"
-          />
-          <button type="submit" className="btn-primary rounded-l-none">
-            Search
-          </button>
-        </form>
-
-        <nav className="flex items-center gap-3 ml-auto">
-          <Link
-            href="/track-order"
-            className="text-sm font-medium text-gray-700 hover:text-brand-700 whitespace-nowrap hidden sm:block"
+    <header className="sticky top-0 z-40">
+      <div className="bg-gray-950 text-white">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+          <button
+            type="button"
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="w-11 h-11 flex items-center justify-center rounded-xl hover:bg-white/10"
+            aria-label="Open menu"
           >
-            Track Order
+            <span className="text-3xl leading-none">☰</span>
+          </button>
+
+          <Link href="/" className="text-center">
+            <div className="text-2xl sm:text-3xl font-extrabold tracking-tight">
+              BuyNexa
+            </div>
+            <div className="text-[10px] sm:text-xs text-gray-300 -mt-1">
+              Har Zaroorat, Ek Jagah.
+            </div>
           </Link>
 
-          <Link href="/cart" className="relative shrink-0">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M3 3h2l.4 2M7 13h10l3-8H5.4M7 13L5.4 5M7 13l-2.3 4.6A1 1 0 0 0 5.6 19H17M9 22a1 1 0 1 0 0-2 1 1 0 0 0 0 2Zm8 0a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" />
+          <Link
+            href="/cart"
+            className="relative w-11 h-11 flex items-center justify-center rounded-xl hover:bg-white/10"
+            aria-label="Cart"
+          >
+            <svg
+              width="27"
+              height="27"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <path d="M3 3h2l.4 2M7 13h10l3-8H5.4M7 13L5.4 5M7 13l-2.3 4.6A1 1 0 0 0 5.6 19H17" />
+              <circle cx="9" cy="21" r="1" />
+              <circle cx="17" cy="21" r="1" />
             </svg>
+
             {totalQuantity > 0 && (
-              <span className="absolute -top-2 -right-2 bg-accent-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+              <span className="absolute top-0 right-0 bg-orange-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                 {totalQuantity}
               </span>
             )}
           </Link>
+        </div>
 
-          <button
-            type="button"
-            onClick={() => setMenuOpen(!menuOpen)}
-            className="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-200 text-gray-700"
-            aria-label="Open menu"
-          >
-            <span className="text-2xl leading-none">☰</span>
-          </button>
-        </nav>
+        <div className="max-w-7xl mx-auto px-4 pb-4">
+          <form onSubmit={handleSearch} className="flex">
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search for products..."
+              className="w-full h-11 px-4 rounded-l-xl bg-white text-gray-900 outline-none"
+            />
+            <button
+              type="submit"
+              className="px-5 h-11 rounded-r-xl bg-orange-500 text-white font-bold"
+            >
+              Search
+            </button>
+          </form>
+        </div>
       </div>
 
-      <form onSubmit={handleSearch} className="sm:hidden px-4 pb-3 flex">
-        <input
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search products..."
-          className="input rounded-r-none"
-        />
-        <button type="submit" className="btn-primary rounded-l-none">
-          Go
-        </button>
-      </form>
-
       {menuOpen && (
-        <div className="border-t border-gray-100 bg-white shadow-lg">
-          <nav className="px-4 py-3 space-y-1">
+        <div className="border-b border-gray-200 bg-white shadow-lg">
+          <nav className="max-w-7xl mx-auto px-4 py-3 space-y-1">
             <Link
               href="/"
               onClick={() => setMenuOpen(false)}
@@ -105,7 +109,7 @@ export default function Header() {
             >
               🚚 Track Order
             </Link>
-            
+
             <Link
               href="/support"
               onClick={() => setMenuOpen(false)}
