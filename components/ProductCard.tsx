@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useCart } from "@/context/CartContext";
 import { useRouter } from "next/navigation";
+import CountdownTimer from "@/app/product/[slug]/CountdownTimer";
 
 export type ProductCardData = {
   id: string;
@@ -12,6 +13,8 @@ export type ProductCardData = {
   price: number;
   originalPrice: number;
   stock: number;
+  discountDurationHours: number | null;
+  discountStartedAt: string | null;
   images: { url: string }[];
 };
 
@@ -60,6 +63,14 @@ export default function ProductCard({ product }: { product: ProductCardData }) {
       </div>
       <div className="p-3">
         <h3 className="text-sm font-medium text-gray-800 line-clamp-2 h-10">{product.name}</h3>
+        <CountdownTimer
+          durationHours={product.discountDurationHours}
+          startedAt={product.discountStartedAt}
+        />
+        <CountdownTimer
+          durationHours={product.discountDurationHours}
+          startedAt={product.discountStartedAt}
+        />
         <div className="flex items-baseline gap-2 mt-1">
           <span className="text-lg font-bold text-gray-900">₹{product.price}</span>
           {discountPct > 0 && (

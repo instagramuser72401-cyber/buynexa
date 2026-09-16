@@ -33,6 +33,7 @@ export default async function CategoryPage({
     ...p,
     price: Number(p.price),
     originalPrice: Number(p.originalPrice),
+    discountStartedAt: p.discountStartedAt?.toISOString() || null,
   }));
 
   return (
