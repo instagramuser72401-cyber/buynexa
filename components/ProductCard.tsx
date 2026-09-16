@@ -63,20 +63,17 @@ export default function ProductCard({ product }: { product: ProductCardData }) {
       </div>
       <div className="p-3">
         <h3 className="text-sm font-medium text-gray-800 line-clamp-2 h-10">{product.name}</h3>
-        <CountdownTimer
-          durationHours={product.discountDurationHours}
-          startedAt={product.discountStartedAt}
-        />
-        <CountdownTimer
-          durationHours={product.discountDurationHours}
-          startedAt={product.discountStartedAt}
-        />
         <div className="flex items-baseline gap-2 mt-1">
           <span className="text-lg font-bold text-gray-900">₹{product.price}</span>
           {discountPct > 0 && (
             <span className="text-xs text-gray-400 line-through">₹{product.originalPrice}</span>
           )}
         </div>
+        <CountdownTimer
+          durationHours={product.discountDurationHours}
+          startedAt={product.discountStartedAt}
+          compact
+        />
         <p className={`text-xs mt-1 ${outOfStock ? "text-red-500" : "text-green-600"}`}>
           {outOfStock ? "Out of stock" : `In stock (${product.stock})`}
         </p>

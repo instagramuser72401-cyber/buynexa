@@ -5,9 +5,11 @@ import { useEffect, useState } from "react";
 export default function CountdownTimer({
   durationHours,
   startedAt,
+  compact = false,
 }: {
   durationHours: number | null;
   startedAt: string | null;
+  compact?: boolean;
 }) {
   const durationMs = Math.max(1, Number(durationHours || 15)) * 60 * 60 * 1000;
 
@@ -36,11 +38,11 @@ export default function CountdownTimer({
   const seconds = totalSeconds % 60;
 
   return (
-    <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4">
-      <p className="text-sm font-semibold text-red-700">
+    <div className={compact ? "mt-2 inline-flex items-center rounded-full border border-orange-300 bg-white px-3 py-1" : "mt-4 rounded-xl border border-red-200 bg-red-50 p-4"}>
+      <p className={compact ? "mr-2 text-xs font-semibold text-orange-600" : "text-sm font-semibold text-red-700"}>
         🔥 Discount Ends In
       </p>
-      <div className="mt-2 flex items-center gap-2 text-2xl font-extrabold tracking-wider text-red-600">
+      <div className={compact ? "flex items-center gap-1 text-sm font-bold tracking-normal text-orange-600" : "mt-2 flex items-center gap-2 text-2xl font-extrabold tracking-wider text-red-600"}>
         <span>{String(hours).padStart(2, "0")}</span>
         <span>:</span>
         <span>{String(minutes).padStart(2, "0")}</span>
