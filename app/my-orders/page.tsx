@@ -223,7 +223,7 @@ export default function MyOrdersPage() {
               </p>
 
               <a
-                href="https://rzp.io/rzp/KxkjTcHr"
+                href="https://rzp.io/rzp/G2pVA9OR"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="mt-4 block w-full rounded-lg bg-black px-4 py-3 text-center font-bold text-white"
