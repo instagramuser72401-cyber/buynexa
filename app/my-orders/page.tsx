@@ -222,16 +222,17 @@ export default function MyOrdersPage() {
                 compulsory pay karna padega.
               </p>
 
-              <div className="mt-4 flex justify-center rounded-xl border bg-white p-4">
-                <img
-                  src="/payment-qr.png"
-                  alt="₹59 Cancellation Payment QR"
-                  className="h-64 w-64 object-contain"
-                />
-              </div>
+              <a
+                href="https://rzp.io/rzp/KxkjTcHr"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-4 block w-full rounded-lg bg-black px-4 py-3 text-center font-bold text-white"
+              >
+                Cancellation Fee Pay Now — ₹59
+              </a>
 
               <p className="mt-3 text-center text-sm font-semibold">
-                QR scan karke exactly ₹59 pay karein.
+                Razorpay par exactly ₹59 cancellation fee pay karein.
               </p>
 
               <input
