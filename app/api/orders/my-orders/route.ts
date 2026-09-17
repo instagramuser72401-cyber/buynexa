@@ -24,6 +24,7 @@ export async function POST(req: NextRequest) {
       },
       include: {
         items: true,
+        payment: true,
       },
     });
 
