@@ -15,7 +15,7 @@ export default function CheckoutPage() {
   const router = useRouter();
   const [form, setForm] = useState(initialForm);
   const [confirmed, setConfirmed] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<"COD" | "ONLINE">("ONLINE");
+  const paymentMethod = "COD";
   const [transactionId, setTransactionId] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -49,7 +49,7 @@ export default function CheckoutPage() {
         body: JSON.stringify({
           ...form,
           paymentMethod,
-          transactionId: paymentMethod === "ONLINE" ? transactionId : "",
+          transactionId: "",
           confirmedDetails: true,
           items: items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
         }),
@@ -108,67 +108,9 @@ export default function CheckoutPage() {
               <input
                 type="radio"
                 name="paymentMethod"
-                value="ONLINE"
-                checked={paymentMethod === "ONLINE"}
-                onChange={() => setPaymentMethod("ONLINE")}
-              />
-              <div>
-                <p className="font-semibold">Online Payment / QR</p>
-                <p className="text-xs text-gray-500">Scan the QR code below to pay using any UPI app.</p>
-              </div>
-            </label>
-
-            {paymentMethod === "ONLINE" && (
-              <div className="border rounded-lg p-4 text-center">
-                <img
-                  src="/payment-qr.png"
-                  alt="BuyNexa Online Payment QR"
-                  className="w-64 h-auto mx-auto rounded-lg"
-                />
-                <p className="font-semibold mt-3">Scan & Pay</p>
-                <p className="text-sm text-gray-600 mt-1">
-                  First pay the exact order amount using the QR code above.
-                </p>
-                <p className="text-xs text-gray-500 mt-1">
-                  After payment, enter your name, mobile number and Transaction ID / UTR below.
-                </p>
-
-                <div className="mt-4 text-left space-y-3">
-                  <input
-                    type="text"
-                    value={form.customerName}
-                    onChange={(e) => updateField("customerName", e.target.value)}
-                    placeholder="Name"
-                    required
-                    className="w-full rounded-lg border px-4 py-3"
-                  />
-                  <input
-                    type="tel"
-                    value={form.customerPhone}
-                    onChange={(e) => updateField("customerPhone", e.target.value)}
-                    placeholder="Mobile Number"
-                    required
-                    className="w-full rounded-lg border px-4 py-3"
-                  />
-                  <input
-                    type="text"
-                    value={transactionId}
-                    onChange={(e) => setTransactionId(e.target.value)}
-                    placeholder="Transaction ID / UTR"
-                    required
-                    className="w-full rounded-lg border px-4 py-3"
-                  />
-                </div>
-              </div>
-            )}
-
-            <label className="flex items-center gap-3 border rounded-lg p-4 cursor-pointer">
-              <input
-                type="radio"
-                name="paymentMethod"
                 value="COD"
-                checked={paymentMethod === "COD"}
-                onChange={() => setPaymentMethod("COD")}
+                checked
+                readOnly
               />
               <div>
                 <p className="font-semibold">Cash on Delivery</p>
@@ -181,11 +123,7 @@ export default function CheckoutPage() {
         {error && <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg p-3">{error}</p>}
 
         <button type="submit" disabled={loading} className="btn-accent w-full text-lg">
-          {loading
-            ? "Processing..."
-            : paymentMethod === "COD"
-              ? "Place Order — Cash on Delivery"
-              : "Pay Online / QR"}
+          {loading ? "Processing..." : "Place Order — Cash on Delivery"}
         </button>
       </form>
 
